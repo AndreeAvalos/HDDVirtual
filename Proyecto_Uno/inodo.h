@@ -1,0 +1,6 @@
+#ifndef INODO_H_INCLUDED
+#define INODO_H_INCLUDED
+
+
+
+#endif // INODO_H_INCLUDED

@@ -19,8 +19,11 @@ int main()
 }
 
 //variables que se guardan para crear Archivo
-int sizeArchivo;
-char *pathArchivo,*unitArchivo,*tipoArchivo,*carpetaArchivo[30];
+int sizeArchivo=0;
+char *pathArchivo=NULL,*unitArchivo=NULL,*tipoArchivo=NULL,*carpetaArchivo[30];
+//banderas para saber si se puede ejecutar la creacion de archivos
+//{size,unidad,ruta}
+int fileReady[3]= {False,False,False};
 //-------------------------------------------
 
 //Variable que pone pausa en el while
@@ -64,7 +67,7 @@ void Menu()
 
             }
             //llamamos el metodo MKDISK para optener los valores y crear el archivo
-            MKDISK(parametros[1],parametros[2],parametros[3]);
+            MKDISK(parametros[0],parametros[1],parametros[2],parametros[3]);
         }
         else if(strcmp(trozo,"rmdisk")==0)
         {
@@ -84,7 +87,7 @@ void Menu()
 
             }
             //llamamos el metodo MKDISK para optener los valores y crear el archivo
-            RMDISK(parametros[1]);
+            RMDISK(parametros[0],parametros[1]);
 
 
         }
@@ -179,17 +182,29 @@ void Parser(char cadena[200])
 }
 
 //metodo publico de Creacion de Archivos binarios
-void MKDISK(char *size, char *unit, char *path)
+void MKDISK(char *cmd,char *size, char *unit, char *path)
 {
+    split(size,cmd);//separamos la parte de tamano y obtenemos su valor
+    split(unit,cmd);//obtenemos el valor de la unidad
+    split(path,cmd);//obtenemos el valor de la ruta
 
-    split(size);//separamos la parte de tamano y obtenemos su valor
-    split(unit);//obtenemos el valor de la unidad
-    split(path);//obtenemos el valor de la ruta
-    printf("Tamano de la unidad a crear: %d\n",sizeArchivo);
-    printf("Tipo de unidad: %s\n",tipoArchivo);
-    printf("Ruta de archivo a crear: %s\n",pathArchivo);
-    separarRuta(pathArchivo);//separamos la ruta para poder crear el arbol de carpetas donde se creeara el archivo
-    CrearArchivo(sizeArchivo,unitArchivo,pathArchivo);//creamos el archivo binario que sera nuestro disco duro virtual
+    if(fileReady[0]==True && fileReady[0]==True && fileReady[0]==True)
+    {
+        printf("Tamano de la unidad a crear: %d\n",sizeArchivo);
+        printf("Tipo de unidad: %s\n",tipoArchivo);
+        printf("Ruta de archivo a crear: %s\n",pathArchivo);
+        separarRuta(pathArchivo);//separamos la ruta para poder crear el arbol de carpetas donde se creeara el archivo
+        if(sizeArchivo>0)
+            CrearArchivo(sizeArchivo,unitArchivo,pathArchivo);//creamos el archivo binario que sera nuestro disco duro virtualo
+        else
+            printf("No se puede crear archivo por que es 0 o numero negativo");
+
+        fileReady[0]=False;
+        fileReady[1]=False;
+        fileReady[2]=False;
+    }
+    else
+        printf("No se puede crear archivo por falta de parametros\n");
     printf("********************* Proceso Terminado ************************\n");
     printf("\t");
     NewLine=False;
@@ -268,47 +283,57 @@ void CrearArchivo(int size, char *unit,char *path)
 
 }
 
-void RMDISK(char *path)
+void RMDISK(char *cmd,char *path)
 {
-    split(path);//separamos el ruta para obtener el valor
-    printf("Ruta donde se va a eliminar: %s\n",pathArchivo);
-    char comando[500];
-    FILE *archivo = fopen(pathArchivo,"rb");
-    if(archivo)
+    split(path,cmd);//separamos el ruta para obtener el valor
+    if(fileReady[2]==True)
     {
-        fclose(archivo);
-
-        strcpy(comando,"sudo rm ");
-        strcat(comando,pathArchivo);
-        system(comando);
-
-
-
-        archivo=fopen(pathArchivo,"rb");
+        printf("Ruta donde se va a eliminar: %s\n",pathArchivo);
+        char comando[500];
+        FILE *archivo = fopen(pathArchivo,"rb");
         if(archivo)
         {
-            printf("No se pudo eliminar el Disco\n");
+            fclose(archivo);
+
+            strcpy(comando,"sudo rm ");
+            strcat(comando,pathArchivo);
+            system(comando);
+
+
+
+            archivo=fopen(pathArchivo,"rb");
+            if(archivo)
+            {
+                printf("No se pudo eliminar el Disco\n");
+            }
+            else
+            {
+
+                printf("Disco Eliminado con exito\n");
+            }
+
         }
+
         else
         {
-
-            printf("Disco Eliminado con exito\n");
+            printf("No existe Disco en la direccion %s\n",pathArchivo);
         }
-
+        fileReady[2]=False;
+        free(archivo);
+        pathArchivo=NULL;
     }
-
     else
     {
-        printf("No existe Disco en la direccion %s\n",pathArchivo);
+        printf("No ha ingresado una ruta\n");
     }
-    free(archivo);
+
     printf("********************* Proceso Terminado ************************\n");
     printf("\t");
 
 }
 
 //para separar por split
-void split(char *valor)
+void split(char *valor,char *cmd)
 {
 
     char *temporal;
@@ -326,12 +351,14 @@ void split(char *valor)
             temporal = strtok(NULL,separador);
             //Parseamos el valor a int
             sizeArchivo = atoi(temporal);
+            fileReady[0]=True;
         }
         else if(strcmp(temporal,"unit")==0)
         {
             temporal = strtok(NULL,separador);
             //Especificamos que tipo es
             unitArchivo = temporal;
+            fileReady[1]=True;
             if(strcmp(unitArchivo,"k")==0)
                 tipoArchivo="KiloByte";
             else if(strcmp(unitArchivo,"m")==0)
@@ -344,16 +371,17 @@ void split(char *valor)
             temporal = strtok(NULL,separador);
             //Parseamos el valor a int
             pathArchivo = temporal;
+            fileReady[2]=True;
         }
         else
         {
-            printf("ERROR---No existe %s en linea de comando MKDISK\n",temporal);
+            printf("ERROR---No existe parametro %s en linea de comando %s\n",temporal,cmd);
             return;
         }
     }
     else
     {
-        printf("ERROR---Falta de argumentos en linea de comando MKDISK\n");
+        printf("ERROR---Falta de argumentos en linea de comando %s\n",cmd);
     }
 }
 

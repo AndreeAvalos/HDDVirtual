@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1518446758 source:/home/andree/Escritorio/Manejo e Implemento de Archivos/Proyecto 1/Proyecto_Uno/main.c
+1518494079 source:/home/andree/Escritorio/Manejo e Implemento de Archivos/Proyecto 1/Proyecto_Uno/main.c
 	<stdio.h>
 	<stdlib.h>
 	<setjmp.h>

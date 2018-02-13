@@ -113,7 +113,7 @@ void separarRuta(char *ruta)
     //copiamos el contenido del string de entrada y lo pasamos a variable string
     strcpy(palabra,string);
 
-    printf("La direccion es: %s\n",palabra);
+    //printf("La direccion es: %s\n",palabra);
     //variable en donde se alojara la ruta temporal, los nombres de direccion
     char *rutatemp;
     //split para separar la ruta temporal
@@ -128,7 +128,7 @@ void separarRuta(char *ruta)
     }
     //volvemos a copar el string para divirlo
     strcpy(palabra,string);
-    printf("Ruta a divir: %s\n",palabra);
+    //printf("Ruta a divir: %s\n",palabra);
     //lo separamos por /
     rutatemp = strtok(palabra,"/");
     //directorio donde se va a juntar la ruta completa de carpetas
@@ -195,95 +195,74 @@ void MKDISK(char *size, char *unit, char *path)
     NewLine=False;
 }
 //metodo interno para creacion de archivos
-void CrearArchivo(char *size, char *unit,char *path)
+void CrearArchivo(int size, char *unit,char *path)
 {
 //string donde se guardara la instruccion
+
     char comando[500];
     strcpy(comando,"sudo mkdir -p ");//comando para crear arbol de carpetas
     strcat(comando,carpetaArchivo);//concatenamos el comando con la ruta de carpetas
-    printf("Comando a ejecutarse %s\n",comando);
+    //printf("Comando a ejecutarse %s\n",comando);
     system(comando);//ejecutamos el comando
     strcpy(comando,"sudo chmod 777 ");//comando para dar permisos de escritura lectura y ejecucion
     strcat(comando,carpetaArchivo);//concatenamos el comando con la carpeta a dar permisos
     system(comando);//ejecutamos el comando
-    char cadena [] = "0";
-    int bytes = sizeArchivo; //bytes a poner en el archivo
-    int kilobytes = sizeArchivo*1024;//kilobytes en el archivo
-    int megabytes = kilobytes*1024;//megabytes en el archivo
-    int numLineas = 0;
-    int contador=0;
+    int bt=size;
+    int bytes = bt*8; //bytes a poner en el archivo
+    int kilobytes = bt*1024;//kilobytes en el archivo
+    int megabytes =kilobytes*1024;//megabytes en el archivo
+    char *bite='\0';
 
-    FILE *archivo = fopen(path,"wb");//creamos un archivo tipo solo para abrir
+
+    FILE *archivo = fopen(path,"ab+");//creamos un archivo tipo solo para abrir
     if(archivo)//comprobamos si existe el archivo
     {
-        int i =0;
-        int j =0;
 
         if(strcmp(unitArchivo,"b")==0)//comparamos si es bytes
         {
             //ciclo que llena el archivo de 0 byte por byte
-            for(i=0; i<bytes; i++)
+
+            for(int i=0; i<bytes; i++)
             {
-                fputs(cadena, archivo);
+                fwrite(&bite,1,1,archivo);
             }
+
 
         }
         else if(strcmp(unitArchivo,"k")==0)//comparacion si es kilobytes
         {
-            numLineas=kilobytes/100;
-            //ciclo que llena el archivo de 0 byte por byte
-            for(i=0; i<numLineas; i++)
+
+            for(int i=0; i<kilobytes; i++)
             {
-                for(j=0; j<100; j++)
-                {
-                    if(contador<=kilobytes)
-                    {
-                        fputs(cadena, archivo);
-                        contador++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                fputs("\n", archivo);
+                fwrite(&bite,1,1,archivo);
             }
 
 
         }
         else if (strcasecmp(unitArchivo,"m")==0)//comparamos si es megabyte
         {
-            numLineas=megabytes/1000;
-            //ciclo que llena el archivo de 0 byte por byte
-            for(i=0; i<numLineas; i++)
+            for(int i=0; i<megabytes; i++)
             {
-                for(j=0; j<1000; j++)
-                {
-                    if(contador<=megabytes)
-                    {
-                        fputs(cadena, archivo);
-                        contador++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                fputs("\n", archivo);
+                fwrite(&bite,1,1,archivo);
             }
+
         }
         else
         {
             //error no ejecutar
+            printf("=====NO SE PUDO CREAR EL DISCO===");
 
         }
         printf("Se creo el archivo en el directorio\n");
+
+
     }
     else
     {
         printf("No se pudo crear el Archivo\n");
 
     }
+
 
     fclose(archivo);
 

@@ -6,10 +6,11 @@
 	<string.h>
 	<ctype.h>
 
-1518496872 source:/home/andree/Escritorio/Manejo e Implemento de Archivos/HDDVirtual/Proyecto_Uno/main.c
+1519146771 source:/home/andree/Escritorio/Manejo e Implemento de Archivos/HDDVirtual/Proyecto_Uno/main.c
 	<stdio.h>
 	<stdlib.h>
 	<setjmp.h>
 	<string.h>
 	<ctype.h>
+	<time.h>
 
